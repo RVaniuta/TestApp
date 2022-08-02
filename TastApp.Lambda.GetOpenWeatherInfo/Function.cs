@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -8,12 +8,14 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using TestApp.Core;
 using TestApp.Core.Services.Interfaces;
 
+// Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
-namespace Lambda
+namespace TastApp.Lambda.GetOpenWeatherInfo
 {
     public class Function
     {
@@ -38,7 +40,7 @@ namespace Lambda
 
             context.Logger.LogLine($"Received {apigProxyEvent}");
 
-            var city = apigProxyEvent.PathParameters["city"];
+            var city = apigProxyEvent.QueryStringParameters["city"];
 
             using (ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider())
             {
@@ -53,18 +55,18 @@ namespace Lambda
                     Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
                 };
             }
-            
+
         }
 
         private void ConfigureServices()
         {
             var configuration = new ConfigurationBuilder()
-                .AddSecretsManager(configurator: opts =>
-                {
-                     opts.KeyGenerator = (secret, name) => name.Replace("__", ":");
-                }).Build();
+                .AddJsonFile("appsettings.json")
+                .AddSecretsManager()
+                .Build();
 
             _serviceCollection = new ServiceCollection();
+
             _serviceCollection.AddTestAppCore(configuration);
         }
     }

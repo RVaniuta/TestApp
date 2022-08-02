@@ -8,6 +8,7 @@ using TestApp.Core.Clients.Interfaces;
 using TestApp.Core.Services;
 using TestApp.Core.Services.Interfaces;
 using TestApp.Core.Cache;
+using TestApp.Core.Configuration;
 
 namespace TestApp.Core
 {
@@ -16,6 +17,8 @@ namespace TestApp.Core
         public static IServiceCollection AddTestAppCore(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<OpenWeatherClientOptions>(configuration.GetSection(nameof(OpenWeatherClientOptions)));
+
+            services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
 
             services.Configure<CacheOptions>(configuration.GetSection(nameof(CacheOptions)));
 
